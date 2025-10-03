@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  operation-bad:
+    build: .
+    container_name: operation-bad
+    environment:
+      - DISPLAY=:0
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./mission_logs:/mission/logs
+    network_mode: host
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+  # Alternative web version (if we add web interface)
+  operation-bad-web:
+    build: .
+    container_name: operation-bad-web
+    ports:
+      - "8000:8000"
+    command: ["python", "web_interface.py"]
+    restart: unless-stopped

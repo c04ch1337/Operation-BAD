@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Operation B.A.D. - Mission Control</title>
+    <style>
+        body {
+            background: #0a1929;
+            color: white;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+        .mission-header {
+            background: #1e3a5c;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #4caf50;
+        }
+        .soldier-card {
+            background: #1e3a5c;
+            border: 1px solid #34495e;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px;
+            display: inline-block;
+            width: 300px;
+            vertical-align: top;
+        }
+        .soldier-name {
+            font-weight: bold;
+            color: #4caf50;
+        }
+        .soldier-rank {
+            color: #ff9800;
+        }
+        .soldier-status {
+            color: #64b5f6;
+            font-style: italic;
+        }
+        .medals {
+            color: gold;
+            font-size: 1.2em;
+        }
+        .installation {
+            background: #2c3e50;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .mission-stats {
+            background: #34495e;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="mission-header">
+        <h1>🚀 OPERATION: B.A.D.</h1>
+        <h2>BUSINESS ARMY DEVELOPMENT - MISSION CONTROL</h2>
+        <div class="mission-stats">
+            <div id="stats">Active Personnel: 6 | Missions Completed: 0</div>
+        </div>
+    </div>
+
+    <div id="soldiers-container"></div>
+
+    <script>
+        const ws = new WebSocket('ws://' + window.location.host + '/websocket');
+        
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            updateDisplay(data);
+        };
+        
+        function updateDisplay(data) {
+            // Update stats
+            document.getElementById('stats').textContent = 
+                `Active Personnel: ${data.soldiers.length} | Missions Completed: ${data.completed_missions}`;
+            
+            // Update soldiers
+            const container = document.getElementById('soldiers-container');
+            container.innerHTML = '';
+            
+            data.soldiers.forEach(soldier => {
+                const card = document.createElement('div');
+                card.className = 'soldier-card';
+                card.innerHTML = `
+                    <div class="soldier-name">${soldier.name}</div>
+                    <div class="soldier-rank">${soldier.rank} - ${soldier.current_mission.replace('_', ' ')}</div>
+                    <div class="soldier-status">${soldier.status}</div>
+                    <div class="medals">${soldier.medals.join(' ')}</div>
+                    <div>Position: (${Math.round(soldier.x)}, ${Math.round(soldier.y)})</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        // Request status every second
+        setInterval(() => {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({command: 'get_status'}));
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
