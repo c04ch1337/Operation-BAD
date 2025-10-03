@@ -1,2 +1,4 @@
+tornado>=6.0
+pygame==1.9.6
 pgzero==1.2
-pygame==2.5.0
+numpy
